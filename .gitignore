@@ -1,0 +1,7 @@
+config.json
+/bin
+/node_modules
+.DS_Store
+/public/words
+/Tharn
+.htaccess
