@@ -5,14 +5,14 @@ var Schema = mongoose.Schema;
 
 var thumbSchema = new Schema({
   file: String,
-  fetched_date: { type: Date, default: Date.now },
 });
 
 var wordSchema = new Schema({
   word: String,
   syllable: Number,
   type: String,
-  thumbs: [thumbSchema]
+  thumbs: [thumbSchema],
+  fetched_date: { type: Date, default: Date.now }
 });
 mongoose.model('words', wordSchema);
 

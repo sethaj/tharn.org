@@ -19,7 +19,7 @@ app.configure( function() {
 
 var routes = require( './routes.js' );
 app.get('/', routes.index );
-app.get('/fetchthumbs', routes.fetchthumbs );
+app.get('/fetchone', routes.fetchone );
 
 
 var port = 8089;
