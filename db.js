@@ -6,12 +6,16 @@ var Schema = mongoose.Schema;
 var thumbSchema = new Schema({
   file: String,
 });
+var imageSchema = new Schema({
+  file: String,
+});
 
 var wordSchema = new Schema({
   word: String,
   syllable: Number,
   type: String,
   thumbs: [thumbSchema],
+  images: [imageSchema],
   fetched_date: { type: Date, default: Date.now }
 });
 mongoose.model('words', wordSchema);

@@ -3,12 +3,14 @@
 var mongoose  = require('mongoose'),
   nconf       = require( 'nconf' ),
   https       = require( 'https' ),
+  http        = require( 'http' ),
   url         = require( 'url' ),
   request     = require( 'request' ),
   fs          = require( 'fs' ),
   mkpath      = require( 'mkpath' ),
   mime        = require( 'mime' ),
   pairtree    = require( 'pairtree' ),
+  path        = require( 'path' ),
   Word        = mongoose.model('words');
 
 nconf.use('file', { file: './config.json' });
@@ -39,62 +41,47 @@ exports.fetchone = function(req, res) {
   Word.count({}, function(err, count) {
     Word.findOne().limit(-1).skip(Math.floor(Math.random()*count)).exec(function(error, word) {
       if (error) throw error;
-      console.log("word id: " + word._id);
+      console.log('word id: ObjectId("' + word._id +'")');
 
       var azureUrl = "https://user:"+key+"@api.datamarket.azure.com/Data.ashx/Bing/Search/v1/Image?Query=%27"+word.word+"%27&$top=20&$format=JSON";
       var httpsreq = https.request(azureUrl, function(response) {
 
-        response.on('data', function(data) {
+        var data = '';
+        response.on('data', function(chunk) {
+          data += chunk;
+        });
+        response.on('end', function() {
           var pics      = JSON.parse(data);  
-          var path      = __dirname + '/public/words' + pairtree.path(word.word) + word.word;
-          var th_path   = path + '/thumbs/';
-          var img_path  = path + '/images/';
+          var wd_path   = __dirname + '/public/words' + pairtree.path(word.word) + word.word;
+          var th_path   = wd_path + '/thumbs/';
+          var img_path  = wd_path + '/images/';
           // azure is returning 'image/jpg' not 'image/jpeg', register it
           mime.define({ 'image/jpg': ['jpg']});
 
-          mkpath(path, function(err) {
-            fs.writeFile(path + "/" + word.word + ".json", JSON.stringify(pics, null, 4), function(err) {
+          mkpath(wd_path, function(err) {
+            fs.writeFile(wd_path + "/" + word.word + ".json", JSON.stringify(pics, null, 4), function(err) {
               if (err) console.log(err);
             });
             mkpath(th_path, function(e) {
               pics.d.results.forEach(function(result) {
                 var parts = url.parse(result.Thumbnail.MediaUrl, true);
-                var file = th_path + parts.query.id + '.' + mime.extension(result.Thumbnail.ContentType);
-                var r = request(result.Thumbnail.MediaUrl).pipe(fs.createWriteStream(file));
-                r.on('end', function() {
-                  word.thumbs.push({ file: file });
-                  word.save(function(error, word) {
-                    if (error) throw error;
-                    console.log("saved "+ file + " to " + word.word);
-                  });
-                })
-                .on('error', function() {
-                  console.log("error fetching thumb " + result.Thumbnail.MediaUrl);
-                  throw error;
-                });
-              });
-            });
-            mkpath(img_path, function(e) {
-              pics.d.results.forEach(function(result) {
-                var parts = url.parse(result.MediaUrl, true);
-                var file = img_path + parts.query.id + '.' + mime.extension(result.ContentType);
-                var r = request(result.MediaUrl).pipe(fs.createWriteStream(file));
-                r.on('end', function() {
+                var id = parts.query.id;
+                var file = th_path + id + '.' + mime.extension(result.Thumbnail.ContentType);
+                
+                request(result.Thumbnail.MediaUrl).pipe(fs.createWriteStream(file));
+                word.thumbs.push({ file: file });
+                word.save();
+              
+                mkpath(img_path, function(e3) {
+                  var img_url = url.parse(result.MediaUrl);
+                  file = img_path + id + '--' + path.basename(img_url.pathname); 
+                  request(result.MediaUrl).pipe(fs.createWriteStream(file));
                   word.images.push({ file: file });
-                  word.save(function(e2, word) {
-                    if (e2) throw error;
-                    console.log("saved " + file + " to " + word.word);
-                  });
-                })
-                .on('error', function() {
-                  console.log("error fetching " + result.MediaUrl);
-                  throw error;
+                  word.save();
                 });
               });
             });
           });
-
-          res.end();
         });
       });
       httpsreq.end();
