@@ -41,7 +41,7 @@ exports.fetchone = function(req, res) {
   Word.count({}, function(err, count) {
     Word.findOne().limit(-1).skip(Math.floor(Math.random()*count)).exec(function(error, word) {
       if (error) throw error;
-      console.log('word id: ObjectId("' + word._id +'")');
+      console.log('word id: ObjectId("' + word._id +'") word: ' + word.word);
 
       var azureUrl = "https://user:"+key+"@api.datamarket.azure.com/Data.ashx/Bing/Search/v1/Image?Query=%27"+word.word+"%27&$top=20&$format=JSON";
       var httpsreq = https.request(azureUrl, function(response) {
@@ -63,7 +63,9 @@ exports.fetchone = function(req, res) {
               if (err) console.log(err);
             });
             mkpath(th_path, function(e) {
+              var count = 0;
               pics.d.results.forEach(function(result) {
+                count++;
                 var parts = url.parse(result.Thumbnail.MediaUrl, true);
                 var id = parts.query.id;
                 var file = th_path + id + '.' + mime.extension(result.Thumbnail.ContentType);
@@ -90,4 +92,5 @@ exports.fetchone = function(req, res) {
       });
     });
   });
+  res.end();
 };
