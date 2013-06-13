@@ -20,7 +20,7 @@ var wordSchema = new Schema({
 });
 mongoose.model('words', wordSchema);
 
-nconf.use('file', { file: './config.json' });
+nconf.use('file', { file: __dirname + '/config.json' });
 var user      = nconf.get('mongo:username');
 var pass      = nconf.get('mongo:password');
 var database  = nconf.get('mongo:database');
