@@ -13,7 +13,7 @@ var mongoose  = require('mongoose'),
   path        = require( 'path' ),
   Word        = mongoose.model('words');
 
-nconf.use('file', { file: './config.json' });
+nconf.use('file', { file: __dirname + '/config.json' });
 var key = nconf.get('azure:key');
 
 exports.index = function(req, res) {
@@ -39,7 +39,7 @@ exports.index = function(req, res) {
 
 exports.fetchone = function(req, res) {
   Word.count({}, function(err, count) {
-    Word.findOne().limit(-1).skip(Math.floor(Math.random()*count)).exec(function(error, word) {
+    Word.findOne({thumbs: {$not: {$size: 0}}}).limit(-1).skip(Math.floor(Math.random()*count)).exec(function(error, word) {
       if (error) throw error;
       console.log('word id: ObjectId("' + word._id +'") word: ' + word.word);
 
