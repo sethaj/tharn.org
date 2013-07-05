@@ -17,21 +17,11 @@ nconf.use('file', { file: __dirname + '/config.json' });
 var key = nconf.get('azure:key');
 
 exports.index = function(req, res) {
-  Word.count({}, function(err, count) {
-    Word.findOne().limit(-1).skip(Math.floor(Math.random()*count)).exec(function(err, word) {
-      //console.log("word: " + word['word']);
-      var azureUrl = "https://user:"+key+"@api.datamarket.azure.com/Data.ashx/Bing/Search/v1/Image?Query=%27"+word['word']+"%27&$top=20&$format=JSON";
-      var httpsreq = https.request(azureUrl, function(response) {
-        response.on('data', function(data) {
-          var pics = JSON.parse(data);
-          console.log(JSON.stringify(pics, null, 4));
-          res.render('index.jade', { pics: pics, word: word['word'] });
-        });
-      });
-      httpsreq.end();
-      httpsreq.on('error', function(e) {
-        console.error(e);
-      });
+  Word.count({'thumbs.file': { $exists: true }}, function(err, count) {
+    Word.findOne({ 'thumbs.file': { $exists: true }} ).limit(-1).skip(Math.floor(Math.random()*count)).exec(function(err, word) {
+      if (err) throw err;
+      console.log(word.word);
+      res.render('index.jade', { word: word });
     });
   });
 };

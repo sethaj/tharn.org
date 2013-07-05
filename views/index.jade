@@ -4,7 +4,9 @@ html(lang="en")
     meta(http-equiv="X-UA-Compatible", content="IE=edge,chrome=1")
   body
     div#content
-      for result in pics.d.results
+      
+      for thumb in word.thumbs
         p
-          img(src="#{result.Thumbnail.MediaUrl}")
-     p #{word} 
+          - var img = thumb.file.replace("/home/serth/tharn.org/public","");
+          img(src="#{img}")
+      p #{word.word} 
