@@ -20,8 +20,20 @@ exports.index = function(req, res) {
   Word.count({'thumbs.file': { $exists: true }}, function(err, count) {
     Word.findOne({ 'thumbs.file': { $exists: true }} ).limit(-1).skip(Math.floor(Math.random()*count)).exec(function(err, word) {
       if (err) throw err;
-      console.log(word.word);
+      var date = new Date();
+      console.log(date + "\t" + "index\t" + word.word);
       res.render('index.jade', { word: word });
+    });
+  });
+};
+
+exports.bigpicture = function(req, res) {
+  Word.count({'images.file': { $exists: true }}, function(err, count) {
+    Word.findOne({ 'images.file': { $exists: true }} ).limit(-1).skip(Math.floor(Math.random()*count)).exec(function(err, word) {
+      if (err) throw err;
+      var date = new Date();
+      console.log(date + "\t" + "bigpicture\t" + word.word);
+      res.send(word);
     });
   });
 };

@@ -19,11 +19,19 @@ app.configure( function() {
 });
 
 var routes = require( './routes.js' );
-app.get('/', routes.index );
+//app.get('/', routes.index );
 app.get('/fetchone', routes.fetchone );
+app.get('/', function(req, res) {
+  res.sendfile(__dirname + '/public/bigpicture.html');
+});
+app.get('/bigpicture', routes.bigpicture );
 
 
 var port = 8089;
+if (__dirname.match('tharn.dev')) {
+  port = 9089;
+}
 app.listen( port, function() {
-    console.log( 'Express server listening on port %d in %s mode', port, app.settings.env );
+    var date = new Date();
+    console.log(date + "\t" + 'Express server listening on port %d in %s mode', port, app.settings.env );
 });
