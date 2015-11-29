@@ -5,3 +5,6 @@ config.json
 /public/words
 /Tharn
 .htaccess
+public/google*
+todo.txt
+favicon*

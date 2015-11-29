@@ -62,7 +62,7 @@ $(document).ready(function() {
     new f.Brightness({ brightness: 100 }),
     new f.GradientTransparency({ threshold: 100 }),
     new f.Noise(),
-    new f.RemoveWhite({ threshold: 100, distance: 10 }),
+    //new f.RemoveWhite({ threshold: 100, distance: 50 }),
     new f.Redify(),
   ];
 
@@ -81,8 +81,9 @@ $(document).ready(function() {
           top: rand( (h + h/2) - img.height),
         });
         img.filters[0] = filters[rand(filters.length)];
-        img.filters[1] = filters[rand(filters.length)];
-        img.filters[2] = new f.Alpha({ strength: rand(255, 50) });
+        //img.filters[1] = filters[rand(filters.length)];
+        img.filters[1] = new f.Alpha({ strength: rand(255, 50) });
+        img.filters[2] = new f.RemoveWhite({ threshold: rand(100), distance: rand(100) });
         img.applyFilters(canvas.renderAll.bind(canvas));
         canvas.add(img);
       });
